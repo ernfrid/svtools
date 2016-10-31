@@ -7,6 +7,13 @@ class SubCommand(object):
     '''
     __metaclass__ = ABCMeta
 
+    def __init__(self, subparser):
+        '''
+        Adds this subcommand to the subparsers object of the main command
+        '''
+        parser = subparser.add_parser(self.name, help=self.description, epilog=self.epilog)
+        self.add_arguments_to_parser(parser)
+
     @abstractmethod
     def add_arguments_to_parser(self, parser):
         '''
@@ -21,19 +28,14 @@ class SubCommand(object):
         '''
         pass
 
-    def add_to_subparser(self, subparser):
-        '''
-        Adds this subcommand to the subparsers object of the command
-        '''
-        parser = subparser.add_parser(self.name, help=self.description, epilog=self.epilog)
-        self.add_arguments_to_parser(parser)
-
-    @abstractproperty
-    def name(self):
+    @classmethod
+    def name(cls):
         '''
         Returns the name of the subcommand
+        For convenience this is just the name of the class in lowercase
+        Override if this isn't the behavior you want
         '''
-        pass
+        return cls.__name__.lower()
 
     @abstractproperty
     def description(self):
@@ -48,8 +50,3 @@ class SubCommand(object):
         Returns the epilog of the subcommand's help text
         '''
         return None
-
-    def command_parser(self):
-        parser = argparse.ArgumentParser(description=self.description, epilog=self.epilog)
-        self.add_arguments_to_parser(parser)
-
