@@ -1,7 +1,6 @@
 import argparse, sys
 from svtools.vcf.file import Vcf
 from svtools.vcf.variant import Variant
-import svtools.utils as su
 
 class UpdateInfo(object):
     def __init__(self, vcf_stream):
@@ -27,7 +26,7 @@ class UpdateInfo(object):
         for line in self.vcf_stream:
             if in_header:
                 if line.startswith('##'):
-                    header.append(line) 
+                    header.append(line)
                     continue
                 elif line.startswith('#CHROM'):
                     v = line.rstrip().split('\t')
@@ -35,7 +34,7 @@ class UpdateInfo(object):
 
                     in_header = False
                     vcf.add_header(header)
-                    
+
                     vcf.add_info('AF', 'A', 'Float', 'Allele Frequency, for each ALT allele, in the same order as listed')
                     vcf.add_info('NSAMP', '1', 'Integer', 'Number of samples with non-reference genotypes')
                     vcf.add_info('MSQ', '1', 'Float', 'Mean sample quality of positively genotyped samples')
@@ -81,7 +80,7 @@ class UpdateInfo(object):
                 var.info['AF'] = ','.join(map(str, ['%.4g' % a for a in allele_freq[1:]]))
             else:
                 var.info['AF'] = ','.join(map(str, allele_freq[1:]))
-            
+
             # populate NSAMP
             var.info['NSAMP'] = num_samp
             if num_samp > 0:
@@ -93,29 +92,3 @@ class UpdateInfo(object):
             # after all samples have been processed, write
             vcf_out.write(var.get_var_string(use_cached_gt_string=True) + '\n')
         vcf_out.close()
-
-def description():
-    return 'add allele frequency information to a VCF file'
-
-def epilog():
-    return 'Specify the path to an (optionally) bgzipped VCF. If no file is specified then input is read from stdin.'
-
-
-def add_arguments_to_parser(parser):
-    parser.add_argument(metavar='<VCF>', dest='input_vcf', nargs='?', default=None, help='VCF input')
-    parser.set_defaults(entry_point=run_from_args)
-
-def command_parser():
-    parser = argparse.ArgumentParser(description=description(), epilog=epilog())
-    add_arguments_to_parser(parser)
-    return parser
-
-def run_from_args(args):
-    with su.InputStream(args.input_vcf) as input_stream:
-        updater = UpdateInfo(input_stream)
-        updater.execute()
-
-if __name__ == '__main__':
-    parser = command_parser()
-    args = parser.parse_args()
-    sys.exit(args.entry_point(args))

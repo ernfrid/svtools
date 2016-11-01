@@ -3,7 +3,7 @@ import svtools.lsort
 import svtools.lmerge
 import svtools.vcfpaste
 import svtools.copynumber
-import svtools.afreq
+import svtools.ui.afreq
 import svtools.bedpetobed12
 import svtools.bedpetovcf
 import svtools.vcftobedpe
@@ -42,8 +42,9 @@ def svtools_cli_parser():
     genotype = subparsers.add_parser('genotype', help=svtools.genotype.description())
     svtools.genotype.add_arguments_to_parser(genotype)
 
-    afreq = subparsers.add_parser('afreq', help=svtools.afreq.description(), epilog=svtools.afreq.epilog())
-    svtools.afreq.add_arguments_to_parser(afreq)
+    svtools.ui.afreq.Afreq(subparsers)
+    #afreq = subparsers.add_parser('afreq', help=svtools.afreq.description(), epilog=svtools.afreq.epilog())
+    #svtools.afreq.add_arguments_to_parser(afreq)
 
     bedpetobed12 = subparsers.add_parser('bedpetobed12', help=svtools.bedpetobed12.description(), epilog=svtools.bedpetobed12.epilog())
     svtools.bedpetobed12.add_arguments_to_parser(bedpetobed12)
