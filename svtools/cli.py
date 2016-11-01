@@ -1,8 +1,8 @@
 import argparse, sys, errno
-import svtools.lmerge
 import svtools.vcfpaste
 import svtools.copynumber
 import svtools.ui.lsort
+import svtools.ui.lmerge
 import svtools.ui.afreq
 import svtools.bedpetobed12
 import svtools.bedpetovcf
@@ -28,9 +28,7 @@ def svtools_cli_parser():
     subparsers = parser.add_subparsers(title=None, metavar='subcommand', help='description')
 
     svtools.ui.lsort.Lsort(subparsers)
-
-    lmerge = subparsers.add_parser('lmerge', help=svtools.lmerge.description(), epilog=svtools.lmerge.epilog())
-    svtools.lmerge.add_arguments_to_parser(lmerge)
+    svtools.ui.lmerge.Lmerge(subparsers)
 
     vcf_paste = subparsers.add_parser('vcfpaste', help=svtools.vcfpaste.description(), epilog=svtools.vcfpaste.epilog())
     svtools.vcfpaste.add_arguments_to_parser(vcf_paste)
