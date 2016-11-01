@@ -11,8 +11,9 @@ class SubCommand(object):
         '''
         Adds this subcommand to the subparsers object of the main command
         '''
-        parser = subparser.add_parser(self.name, help=self.description, epilog=self.epilog)
+        parser = subparser.add_parser(self.name(), help=self.description, epilog=self.epilog)
         self.add_arguments_to_parser(parser)
+        parser.set_defaults(entry_point=self.run_from_args)
 
     @abstractmethod
     def add_arguments_to_parser(self, parser):
@@ -21,12 +22,12 @@ class SubCommand(object):
         '''
         pass
 
-    @abstractmethod
-    def run_from_args(self, args):
+    @staticmethod
+    def run_from_args(args):
         '''
         Runs the subcommand from the args objects
         '''
-        pass
+        raise NotImplemented
 
     @classmethod
     def name(cls):
