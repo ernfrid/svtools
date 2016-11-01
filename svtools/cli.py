@@ -1,8 +1,8 @@
 import argparse, sys, errno
-import svtools.lsort
 import svtools.lmerge
 import svtools.vcfpaste
 import svtools.copynumber
+import svtools.ui.lsort
 import svtools.ui.afreq
 import svtools.bedpetobed12
 import svtools.bedpetovcf
@@ -27,8 +27,7 @@ def svtools_cli_parser():
     parser.add_argument('--support', action=SupportAction, nargs=0, help='information on obtaining support')
     subparsers = parser.add_subparsers(title=None, metavar='subcommand', help='description')
 
-    lsort = subparsers.add_parser('lsort', help=svtools.lsort.description(), epilog=svtools.lsort.epilog())
-    svtools.lsort.add_arguments_to_parser(lsort)
+    svtools.ui.lsort.Lsort(subparsers)
 
     lmerge = subparsers.add_parser('lmerge', help=svtools.lmerge.description(), epilog=svtools.lmerge.epilog())
     svtools.lmerge.add_arguments_to_parser(lmerge)
@@ -43,8 +42,6 @@ def svtools_cli_parser():
     svtools.genotype.add_arguments_to_parser(genotype)
 
     svtools.ui.afreq.Afreq(subparsers)
-    #afreq = subparsers.add_parser('afreq', help=svtools.afreq.description(), epilog=svtools.afreq.epilog())
-    #svtools.afreq.add_arguments_to_parser(afreq)
 
     bedpetobed12 = subparsers.add_parser('bedpetobed12', help=svtools.bedpetobed12.description(), epilog=svtools.bedpetobed12.epilog())
     svtools.bedpetobed12.add_arguments_to_parser(bedpetobed12)
