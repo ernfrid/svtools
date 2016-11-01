@@ -12,7 +12,7 @@ import svtools.bedpesort
 import svtools.genotype
 import svtools.prune
 import svtools.varlookup
-import svtools.sv_classifier
+import svtools.ui.classify
 
 class SupportAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -62,8 +62,7 @@ def svtools_cli_parser():
     varlookup = subparsers.add_parser('varlookup', help=svtools.varlookup.description())
     svtools.varlookup.add_arguments_to_parser(varlookup)
 
-    classifier = subparsers.add_parser('classify', help=svtools.sv_classifier.description())
-    svtools.sv_classifier.add_arguments_to_parser(classifier)
+    svtools.ui.classify.Classify(subparsers)
 
     return parser
 
