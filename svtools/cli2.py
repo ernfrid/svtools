@@ -120,10 +120,29 @@ def lmerge(infile, percent_slop, fixed_slop, use_product, include_genotypes):
             include_genotypes=include_genotypes
             )
 
-# @cli.command(short_help="post-VQSR data pipeline")
-# def vcfpaste():
-#     import svtools.vcfpaste
-# 
+@cli.command(short_help='paste VCFs from multiple samples',
+        epilog='''VCF files may be gzipped. If the -m argument is omitted then the first file in the list of files in --vcf-list is treated as the master.'''
+)
+@click.option('-f', '--vcf-list',
+        metavar='<FILE>',
+        required=True,
+        help='file containing a line-delimited list of VCF files to paste'
+        )
+@click.option('-m', '--master',
+        metavar='<VCF>',
+        default=None,
+        help='VCF file to set first 8 columns of variant info (otherwise first file in --vcf-list)'
+        )
+@click.option('-q', '--sum-quals',
+        required=False,
+        is_flag=True,
+        flag_value=True,
+        help='sum QUAL scores of input VCFs as output QUAL score'
+        )
+def vcfpaste(vcf_list, master, sum_quals):
+    import svtools.vcfpaste
+    paster = Vcfpaste(vcf_list, master=master, sum_quals=sum_quals)
+
 # @cli.command(short_help="post-VQSR data pipeline")
 # def copynumber():
 #     import svtools.copynumber
@@ -147,10 +166,10 @@ def lmerge(infile, percent_slop, fixed_slop, use_product, include_genotypes):
 @cli.command(short_help='sort a VCF file')
 @click.option('-i', '--input',
               type=click.Path(exists=True),
-              help='VCF file to sort (default: stdin)')
+              help='VCF file to sort [default: stdin]')
 @click.option('-o', '--output',
               type=click.Path(),
-              help='output file to write to (default: stdout)')
+              help='output file to write to [default: stdout]')
 def vcfsort(input, output):
     import svtools.vcfsort
     sorter = svtools.vcfsort.VcfSort()
