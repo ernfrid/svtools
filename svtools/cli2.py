@@ -60,7 +60,7 @@ VCF files may be gzipped and the -f argument is available for convenience.'''
         default=200,
         help='number of files to sort in batch')
 @click.argument('vcf_files',
-    metavar='<VCF>',
+    metavar='[<VCF> [<VCF> ...]]', #NOTE Setting this explicitly to match argparse
     type=list,
     nargs=-1,
     required=False,
@@ -114,8 +114,6 @@ def lsort(vcf_list, include_reference, tempdir, batchsize, vcf_files):
               type=click.Path(),
               help='output file to write to (default: stdout)')
 def vcfsort(input, output):
-    click.echo("Input is: {}".format(input))
-    click.echo("Output is: {}".format(output))
     import svtools.vcfsort
     sorter = svtools.vcfsort.VcfSort()
     sorter.run_cmd_with_options(filter(lambda x: x is not None, [input, output]))
