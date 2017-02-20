@@ -143,10 +143,126 @@ def vcfpaste(vcf_list, master, sum_quals):
     import svtools.vcfpaste
     paster = Vcfpaste(vcf_list, master=master, sum_quals=sum_quals)
 
-# @cli.command(short_help="post-VQSR data pipeline")
-# def copynumber():
-#     import svtools.copynumber
-# 
+@cli.command(short_help='add copynumber information using cnvnator-multi',
+        epilog='''As this program runs cnvnator-multi you must provide its location and must remember to have the ROOT package installed and properly configured. The input VCF file may be gzipped. If the input VCF file is omitted then the tool reads from stdin. Note that the coordinates file must end with a line containing the word exit.'''
+        )
+@click.option('-c', '--coordinates',
+        metavar='<FILE>',
+        type=click.Path(exists=True, readable=True),
+        required=True,
+        help='file containing coordinate for which to retrieve copynumber'
+        )
+@click.option('-r', '--root',
+        metavar='<FILE>',
+        type=click.Path(exists=True, readable=True),
+        required=True,
+        help='CNVnator .root histogram file'
+        )
+@click.option('-w', '--window',
+        metavar='<INT>',
+        type=int,
+        required=True,
+        help='CNVnator window size'
+        )
+@click.option('-s', '--sample',
+        metavar='<STRING>',
+        type=str,
+        required=True,
+        help='sample to annotate'
+        )
+@click.option('--cnvnator',
+        metavar='<PATH>',
+        type=click.Path(exists=True),
+        required=True,
+        help='path to cnvnator-multi binary'
+        )
+@click.option('-i', '--input',
+        metavar='<VCF>',
+        default=None,
+        help='VCF input [default: stdin]'
+        )
+@click.option('-o', '--output',
+        metavar='<PATH>',
+        type=click.File('w'),
+        default=click.get_text_stream('stdout'),
+        help='output VCF to write [default: stdout]'
+        )
+def copynumber(input, sample, root, window, output, cnvnator, coordinates):
+    import svtools.copynumber
+    import svtools.utils as su
+    with su.InputStream(input) as stream:
+        sv_readdepth(stream, sample, root, window, output, cnvnator, coordinates)
+
+@cli.command(short_help='compute genotype of structural variants based on breakpoint depth')
+@click.option('-i', '--input_vcf',
+        metavar='<VCF>',
+        help='VCF input [default: stdin]'
+        )
+@click.option('-o', '--output_vcf',
+        metavar='<VCF>',
+        help='output VCF to write [default: stdout]'
+        )
+@click.option('-B', '--bam',
+        metavar='<BAM>',
+        type=click.Path(exists=True, readable=True),
+        required=True,
+        help='BAM or CRAM file(s), comma-separated if genotyping multiple BAMs'
+        )
+@click.option('-l', '--lib_info',
+        metavar='<PATH>',
+        type=click.Path(writable=True, readable=True),
+        required=False,
+        help='create/read JSON file of library information'
+        )
+@click.option('-m', '--min_aligned',
+        type=int,
+        metavar='<INT>',
+        required=False,
+        default=20,
+        show_default=True,
+        help='minimum number of aligned bases to consider read as evidence'
+        )
+@click.option('-n','num_samp',
+        type=int,
+        metavar='<INT>',
+        required=False,
+        default=1000000,
+        show_default=True,
+        help='number of pairs to sample from BAM file for building insert size distribution'
+        )
+@click.option('--split_weight',
+        type=float,
+        metavar='<FLOAT>',
+        required=False,
+        default=1.0,
+        show_default=True,
+        help='weight for split reads'
+        )
+@click.option('--disc_weight',
+        type=float,
+        metavar='<FLOAT>',
+        required=False,
+        default=1.0,
+        show_default=True,
+        help='weight for discordant paired-end reads'
+        )
+@click.option('-w', '--write_alignment',
+        type=click.Path(writable=True),
+        metavar='<PATH>',
+        required=False,
+        default=None,
+        help='write relevant reads to BAM file'
+        )
+def genotype(**kwargs):
+    import svtools.genotype
+    genotyper = svtools.genotype.GenotypeVariants()
+    opts = list()
+    optlut = genotyper.svtyper_option_lut()
+    for variable, value in kwargs.iteritems():
+        if value not in (False, None):
+            opts.extend([optlut[variable], str(value)])
+    genotyper.run_cmd_with_options(opts)
+
 # @cli.command(short_help="post-VQSR data pipeline")
 # def afreq():
 #     import svtools.afreq
@@ -179,9 +295,6 @@ def vcfsort(input, output):
 # def bedpesort():
 #     import svtools.bedpesort
 # 
-# @cli.command(short_help="post-VQSR data pipeline")
-# def genotype():
-#     import svtools.genotype
 # 
 # @cli.command(short_help="post-VQSR data pipeline")
 # def prune():
