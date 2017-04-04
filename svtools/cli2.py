@@ -263,10 +263,23 @@ def genotype(**kwargs):
             opts.extend([optlut[variable], str(value)])
     genotyper.run_cmd_with_options(opts)
 
-# @cli.command(short_help="post-VQSR data pipeline")
-# def afreq():
-#     import svtools.afreq
-# 
+@cli.command(short_help='add allele frequency information to a VCF file',
+        epilog='Specify the path to an (optionally) bgzipped VCF. If no file is specified then input is read from stdin.'
+        )
+@click.argument('input_vcf',
+        metavar='<VCF>',
+        type=click.Path(exists=True, readable=True),
+        default=None,
+        required=False
+        )
+
+def afreq(input_vcf):
+    import svtools.afreq
+    import svtools.utils as su
+    with su.InputStream(input_vcf) as input_stream:
+        updater = svtools.afreq.UpdateInfo(input_stream)
+        updater.execute()
+
 # @cli.command(short_help="post-VQSR data pipeline")
 # def bedpetobed12():
 #     import svtools.bedpetobed12
