@@ -334,9 +334,25 @@ def bedpetovcf(input, output):
     with su.InputStream(input) as stream:
         bedpeToVcf(stream, output)
 
-# @cli.command(short_help="post-VQSR data pipeline")
-# def vcftobedpe():
-#     import svtools.vcftobedpe
+@cli.command(short_help='convert a VCF file to BEDPE',
+        epilog='The input VCF file can be gzipped if it is specified explicitly.'
+        )
+@click.option('-i', '--input',
+        metavar='<VCF>',
+        default=None,
+        help='VCF input [default: stdin]'
+        )
+@click.option('-o', '--output',
+        metavar='<BEDPE>',
+        type=click.File('w'),
+        default=sys.stdout,
+        help='Output BEDPE to write [default: stdout]'
+        )
+def vcftobedpe(input, output):
+    import svtools.vcftobedpe
+    import svtools.utils as su
+    with su.InputStream(input) as stream:
+        vcfToBedpe(stream, output)
 
 @cli.command(short_help='sort a VCF file')
 @click.option('-i', '--input',
