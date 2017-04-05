@@ -280,10 +280,40 @@ def afreq(input_vcf):
         updater = svtools.afreq.UpdateInfo(input_stream)
         updater.execute()
 
-# @cli.command(short_help="post-VQSR data pipeline")
-# def bedpetobed12():
-#     import svtools.bedpetobed12
-# 
+@cli.command(short_help='convert a BEDPE file to BED12 format for viewing in IGV or the UCSC browser',
+        epilog='The input BEDPE file may be gzipped. If the input file is omitted then input is read from stdin. Output is written to stdout.'
+        )
+@click.option('-i', '--input',
+        metavar='<BEDPE>',
+        type=click.Path(exists=True),
+        default=None,
+        help='BEDPE input file [default: stdin]'
+        )
+@click.option('-o', '--output',
+        metavar='<BED12>',
+        type=click.Path(),
+        default=None,
+        help='Output BED12 to write [default: stdout]'
+        )
+@click.option('-n', '--name',
+        metavar='<STRING>',
+        type=str,
+        default='BEDPE',
+        help="The name of the track. Default is 'BEDPE'"
+        )
+@click.option('-d', '--maxdist',
+        metavar='<INT>',
+        default=1000000,
+        type=int,
+        help='The minimum distance for drawing intrachromosomal features as if they are interchromosomal (i.e., without a line spanning the two footprints). Default is 1Mb.'
+        )
+
+def bedpetobed12(input, output, name, maxdist):
+    import svtools.bedpetobed12
+    import svtools.utils as su
+    with su.InputStream(input) as stream:
+        processBEDPE(stream, name, maxdist, output)
+
 # @cli.command(short_help="post-VQSR data pipeline")
 # def bedpetovcf():
 #     import svtools.bedpetovcf
