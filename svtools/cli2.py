@@ -386,10 +386,46 @@ def bedpesort(input, output):
     sorter = svtools.bedpesort.BedpeSort()
     sorter.run_cmd_with_options(filter(lambda x: x is not None, [input, output]))
 
+@cli.command(short_help='cluster and prune a BEDPE file by position based on allele frequency',
+        epilog='The input BEDPE file can be gzipped if it is specified explicitly.'
+        )
+@click.argument('input',
+        metavar='<BEDPE>',
+        default=None,
+        required=False,
+        #help='BEDPE file to read. If \'-\' or absent then defaults to stdin.'
+        )
+@click.option('-o', '--output',
+        metavar='<BEDPE>',
+        type=click.File('w'),
+        default=sys.stdout,
+        help='output bedpe to write [default: stdout]'
+        )
+@click.option('-d', '--distance',
+        metavar='<INT>',
+        type=int,
+        default=50,
+        show_default=True,
+        help='max separation distance (bp) of adjacent loci in cluster'
+        )
+@click.option('-e', '--eval-param',
+        metavar='<STRING>',
+        type=str,
+        help='evaluating parameter for choosing best bedpe in a cluster(e.g. af=AlleleFrequency [default: af])'
+        )
+@click.option('-s', '--is-sorted',
+        is_flag=True,
+        default=False,
+        show_default=True,
+        help='specify if an input file is sorted. Sort with svtools bedpesort.'
+        )
 
-# @cli.command(short_help="post-VQSR data pipeline")
-# def prune():
-#     import svtools.prune
+def prune(input, output, distance, eval_param, is_sorted):
+    import svtools.prune
+    import svtools.utils as su
+    with su.InputStream(args.input) as stream:
+        pruner = svtools.prune.Pruner(distance, eval_param)
+        pruner.cluster_bedpe(stream, output, is_sorted)
 # 
 # @cli.command(short_help="post-VQSR data pipeline")
 # def varlookup():
