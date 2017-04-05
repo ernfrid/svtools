@@ -314,31 +314,63 @@ def bedpetobed12(input, output, name, maxdist):
     with su.InputStream(input) as stream:
         processBEDPE(stream, name, maxdist, output)
 
-# @cli.command(short_help="post-VQSR data pipeline")
-# def bedpetovcf():
-#     import svtools.bedpetovcf
-# 
+@cli.command(short_help='convert a BEDPE file to VCF',
+        epilog='The input BEDPE file can be gzipped if it is specified explicitly.'
+        )
+@click.option('-i', '--input',
+        metavar='<BEDPE>',
+        default=None,
+        help='BEDPE input [default: stdin]'
+        )
+@click.option('-o', '--output',
+        metavar='<VCF>',
+        type=click.File('w'),
+        default=sys.stdout,
+        help='Output VCF to write [default: stdout]'
+        )
+def bedpetovcf(input, output):
+    import svtools.bedpetovcf
+    import svtools.utils as su
+    with su.InputStream(input) as stream:
+        bedpeToVcf(stream, output)
+
 # @cli.command(short_help="post-VQSR data pipeline")
 # def vcftobedpe():
 #     import svtools.vcftobedpe
 
 @cli.command(short_help='sort a VCF file')
 @click.option('-i', '--input',
-              type=click.Path(exists=True),
-              help='VCF file to sort [default: stdin]')
+        metavar='<VCF>',
+        type=click.Path(exists=True),
+        help='VCF file to sort [default: stdin]'
+        )
 @click.option('-o', '--output',
-              type=click.Path(),
-              help='output file to write to [default: stdout]')
+        metavar='<VCF>',
+        type=click.Path(),
+        help='output file to write to [default: stdout]'
+        )
 def vcfsort(input, output):
     import svtools.vcfsort
     sorter = svtools.vcfsort.VcfSort()
     sorter.run_cmd_with_options(filter(lambda x: x is not None, [input, output]))
 
-# @cli.command(short_help="post-VQSR data pipeline")
-# def bedpesort():
-#     import svtools.bedpesort
-# 
-# 
+@cli.command(short_help='sort a BEDPE file')
+@click.option('-i', '--input',
+        metavar='<BEDPE>',
+        type=click.Path(exists=True),
+        help='BEDPE file to sort [default: stdin]'
+        )
+@click.option('-o', '--output',
+        metavar='<BEDPE>',
+        type=click.Path(),
+        help='output file to write to [default: stdout]'
+        )
+def bedpesort(input, output):
+    import svtools.bedpesort
+    sorter = svtools.bedpesort.BedpeSort()
+    sorter.run_cmd_with_options(filter(lambda x: x is not None, [input, output]))
+
+
 # @cli.command(short_help="post-VQSR data pipeline")
 # def prune():
 #     import svtools.prune
