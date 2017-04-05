@@ -471,9 +471,110 @@ def varlookup(afile, bfile, distance, cohort, output):
     except IOError as err:
         sys.stderr.write("IOError " + str(err) + "\n");
 
-# @cli.command(short_help="post-VQSR data pipeline")
-# def sv_classifier():
-#     import svtools.sv_classifier
+@cli.command(short_help='reclassify DEL and DUP based on read depth information')
+@click.option('-i', '--input',
+        metavar='<VCF>',
+        default=None,
+        help='VCF input'
+        )
+@click.option('-o', '--output',
+        metavar='<VCF>', 
+        type=click.File('w'),
+        default=sys.stdout,
+        help='VCF output [default: stdout]'
+        )
+@click.option('-g', '--gender',
+        metavar='<FILE>',
+        type=click.File('r'),
+        required=True,
+        help='tab delimited file of sample genders (male=1, female=2)\nex: SAMPLE_A\t2'
+        )
+@click.option('-a', '--annotation',
+        metavar='<BED>',
+        type=str,
+        default=None,
+        help='BED file of annotated elements'
+        )
+@click.option('-f', '--fraction',
+        metavar='<FLOAT>',
+        type=float,
+        default=0.9,
+        show_default=True,
+        help='fraction of reciprocal overlap to apply annotation to variant'
+        )
+@click.option('-e', '--exclude',
+        metavar='<FILE>', 
+        type=click.File('r'),
+        required=False,
+        default=None,
+        help='list of samples to exclude from classification algorithms'
+        )
+@click.option('-s', '--slope_threshold',
+        metavar='<FLOAT>',
+        type=float,
+        default=1.0,
+        show_default=True,
+        help='minimum slope absolute value of regression line to classify as DEL or DUP'
+        )
+@click.option('-r', '--rsquared_threshold',
+        metavar='<FLOAT>',
+        type=float,
+        default=0.2,
+        show_default=True,
+        help='minimum R^2 correlation value of regression line to classify as DEL or DUP, for large sample reclassification'
+        )
+@click.option('-t', '--tSet',
+        metavar='<VCF>',
+        type=click.Path(exists=True),
+        default=None,
+        required=False,
+        help='high quality deletions & duplications training dataset (VCF), required by naive Bayes reclassification')
+@click.option('-m', '--method',
+        metavar='<STRING>',
+        type=click.Choice(['large_sample', 'naive_bayes', 'hybrid']),
+        default="large_sample",
+        required=False,
+        help='reclassification method, one of (large_sample, naive_bayes, hybrid)'
+        )
+@click.option('-d', '--diag_file',
+        metavar='<FILE>',
+        type=click.Path(),
+        default=None,
+        required=False,
+        help='text file to output method comparisons'
+        )
+def classify(
+        input,
+        output,
+        gender,
+        annotation,
+        fraction,
+        exclude,
+        slope_threshold,
+        rsquared_threshold,
+        tset,
+        diag_file
+        ):
+    import svtools.utils as su
+    import svtools.sv_classifier
+    if tset is None:
+        if method != 'large_sample':
+            sys.stderr.write("Training data required for naive Bayes or hybrid classifiers\n")
+            parser.print_help()
+            sys.exit(1)
+    with su.InputStream(input) as stream:
+        run_reclassifier(stream,
+                output,
+                gender,
+                annotation,
+                overlap,
+                exclude,
+                slope_threshold,
+                rsquared_threshold,
+                tset,
+                method,
+                diag_outfile
+                )
 
 if __name__ == '__main__':
     try:
