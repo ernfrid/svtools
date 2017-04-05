@@ -427,10 +427,50 @@ def prune(input, output, distance, eval_param, is_sorted):
         pruner = svtools.prune.Pruner(distance, eval_param)
         pruner.cluster_bedpe(stream, output, is_sorted)
 # 
-# @cli.command(short_help="post-VQSR data pipeline")
-# def varlookup():
-#     import svtools.varlookup
-# 
+@cli.command(short_help='look for variants common between two BEDPE files')
+@click.option("-a", "--aFile",
+        type=click.Path(exists=True),
+        metavar='<BEDPE>',
+        help="pruned, merged BEDPE (A file) or standard input (-a stdin)."
+        )
+@click.option("-b", "--bFile",
+        type=click.Path(exists=True),
+        metavar='<BEDPE>',
+        help="pruned merged BEDPE (B file) (-b stdin). For pruning use svtools prune"
+        )
+@click.option('-d', '--distance',
+        metavar='<INT>',
+        type=int,
+        default=50,
+        show_default=True,
+        help='max separation distance (bp) of adjacent loci between bedpe files')
+@click.option("-c", "--cohort",
+        metavar='<STRING>',
+        type=str,
+        default=None,
+        help="cohort name to add information of matching variants [default:bFile]"
+        )
+@click.option('-o', '--output',
+        type=click.File('w'),
+        metavar='<BEDPE>',
+        default=sys.stdout,
+        help='output BEDPE to write [default: stdout]'
+        )
+def varlookup(afile, bfile, distance, cohort, output):
+    import svtools.varlookup
+    pass_prefix = "#"
+    if afile == None:
+        if sys.stdin.isatty():
+            sys.stderr.write('Please stream in input to this command or specify the file to read\n')
+            sys.exit(1)
+        else:
+            afile = sys.stdin
+
+    try:
+        varLookup(afile, bfile, output, max_distance, pass_prefix, cohort_name)
+    except IOError as err:
+        sys.stderr.write("IOError " + str(err) + "\n");
+
 # @cli.command(short_help="post-VQSR data pipeline")
 # def sv_classifier():
 #     import svtools.sv_classifier
